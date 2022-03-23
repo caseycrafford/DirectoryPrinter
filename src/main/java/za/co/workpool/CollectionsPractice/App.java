@@ -8,10 +8,10 @@ import java.io.File;
  */
 public class App 
 {
-	static int tabbingInt = 0;
+	static int tabbingInt = -1;
 	
 	
-	public static void main(String[] args) {
+	public static void main() {
 		File currentDir = new File("C:/Users/Developer"); 
 		displayDirectoryContents(currentDir);
 	}
