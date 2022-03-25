@@ -1,9 +1,8 @@
 package za.co.workpool.CollectionsPractice;
 
-import java.io.File;
+import java.io.File; 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -68,46 +67,53 @@ public class App
 		return tabbing;
 	}
 	
-	public static boolean testContentEquals() {
-		String search = "bar";
-		String toSearch = "barcelona";
-		return toSearch.contains(search);
-	}
-	
 	public static void menu() {
 		Scanner sysIn = new Scanner(System.in);
-		try  {
-			String choice = "";
-			Set<String> results = new HashSet<String>();
+		String choice;
+		Set<String> results = new HashSet<String>();
+		boolean repeatMenu = true;
+		
+		while (repeatMenu) {
 			
-			System.out.println("1. View a directory \n2. Find a file in a directory");
+			System.out.println("\n1. View a directory \n2. Find a file in a directory \n3. Exit");
 			choice = sysIn.next();
-			
-			if (choice.equals("1")) {
-				System.out.println("Paste the directory to be viewed below:");
-				File currentDir = new File(sysIn.next());
-				displayDirectoryContents(currentDir);
-			} else if (choice.equals("2")) {
-				System.out.println("Paste the directory you would like to search below:");
-				File currentDir = new File(sysIn.next());
-				System.out.print("Enter search term:");
-				String searchString = sysIn.next();
-				findFileInDirectory(currentDir, searchString, results);
-				System.out.println("========================================================\n\t\t\tResults\n========================================================");
-				for(String result:results) {
-					System.out.println(result);
+			try {
+				switch (choice) {
+				case "1":
+					System.out.println("Paste the directory to be viewed below:");
+					File displayDir = new File(sysIn.next());
+					System.out.println(
+							"========================================================\n\t\t\tResults\n========================================================");
+					displayDirectoryContents(displayDir);
+					System.out.println(
+							"========================================================\n\t\t      End of Results\n========================================================");
+					break;
+
+				case "2":
+					System.out.println("Paste the directory you would like to search below:");
+					File currentDir = new File(sysIn.next());
+					System.out.print("Enter search term:");
+					String searchString = sysIn.next();
+					findFileInDirectory(currentDir, searchString, results);
+					System.out.println(
+							"========================================================\n\t\t\tResults\n========================================================");
+					for (String result : results) {
+						System.out.println(result);
+					}
+					System.out.println(
+							"========================================================\n\t\t     End of Results\n========================================================");
+					break;
+				case "3":
+					System.exit(0);
+
+				default:
+					System.out.println("\nPlease enter 1, 2 or 3\n");
+					break;
 				}
-				System.out.println("========================================================\n\t\t\tEnd\n========================================================");
-			} else 
-				throw new InputMismatchException(); 
-		} catch (InputMismatchException e) {
-			System.out.println("Only 1 or 2 is allowed.");
-			menu();
-		} catch (NoSuchElementException e) {
-			System.out.println("Only 1 or 2 is allowed.");
-			menu();
-		} finally {
-			sysIn.close();
+			} catch (NoSuchElementException e) {
+				System.out.println("Only 1 or 2 is allowed.");
+			} 
 		}
+		sysIn.close();
 	}
 }
