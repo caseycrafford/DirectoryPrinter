@@ -1,8 +1,11 @@
 package za.co.workpool.CollectionsPractice;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;  
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
@@ -28,4 +31,16 @@ public class AppTest {
 		assertTrue(bool);
 	}
 
+	
+	@Test
+	void testStuff() {
+		Map<String,Double> fileMap = new HashMap<String,Double>();
+		long fileSize = 123000;
+		long fileMin = 0;
+		File file = new File("C:Users/Developer/Downloads");
+		App.displayFilesBetweenSize(file, fileMin, fileSize, fileMap);
+		fileMap.forEach((k,v) -> { 
+			System.out.printf("%-110s %110s %n",k,v );
+		});
+	}
 }

@@ -1,6 +1,8 @@
 package za.co.workpool.CollectionsPractice;
 
-import java.io.File; 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -15,8 +17,8 @@ public class App
 	static int tabbingInt = -1;
 	static Map<String, Integer> extensions= new HashMap<String, Integer>();
 	static Scanner sysIn;
-	static String resultStart="========================================================\\n\\t\\t\\tResults\\n========================================================";
-	static String resultEnd="========================================================\\n\\t\\t      End of Results\\n========================================================";
+	static String resultStart="========================================================         Results         ========================================================";
+	static String resultEnd=  "========================================================      End of Results      ========================================================";
 	
 	
 	public static void main(String[] args) {
@@ -77,6 +79,23 @@ public class App
 		}
 		return results;
 	}
+	
+	public static Map<String, Double> displayFilesBetweenSize(File dir,long sizeMin,long sizeMax, Map<String, Double> results) {
+		try {
+			File[] files = dir.listFiles();
+			
+			for (File file : files) {
+				if (file.isDirectory()) {
+					displayFilesBetweenSize(file,sizeMin,sizeMax,results);
+				} else {
+					if(Files.size(Paths.get(file.getPath()))/1024 >= sizeMin && Files.size(Paths.get(file.getPath()))/1024 <= sizeMax)
+						results.put(file.getPath(), Files.size(Paths.get(file.getPath()))/1024.0);
+				}
+			}
+		} catch (Exception e) {
+		}
+		return results;
+	}
 
 	public static String tabbing(int tabs) {
 		String tabbing = "";
@@ -92,7 +111,7 @@ public class App
 		boolean repeatMenu = true;
 		
 		while (repeatMenu) {
-			System.out.println("\n1. View a directory \n2. Find a file in a directory \n3.Search by file extension \n4. Exit");
+			System.out.println("\n1. View a directory \n2. Find a file in a directory \n3. Search by file extension \n4. Search by file size(KB) \n5. Exit");
 			choice = sysIn.next();
 			try {
 				switch (choice) {
@@ -109,6 +128,9 @@ public class App
 					break;
 					
 				case "4":
+					findBySizeMenu();
+					break;
+				case "5":
 					System.exit(0);
 					
 				default:
@@ -157,7 +179,6 @@ public class App
 		if(searchString1.startsWith(".")) {
 			searchString1=searchString1.substring(1);
 		}
-		results.clear();
 		displayExtensionInDirectory(extDir, searchString1, results);
 		System.out.println(resultStart);
 		for (String result : results) {
@@ -165,4 +186,25 @@ public class App
 		}
 		System.out.println(resultEnd);
 	}
+	
+	public static void findBySizeMenu() {
+		Map<String,Double> results = new HashMap<String,Double>();
+		long sizeMin = 0;
+		long sizeMax = 0;
+		System.out.println("Paste the directory you would like to search below:");
+		File currentDir = new File(sysIn.next());
+		
+		System.out.print("Enter minimum file size(KB):");
+		sizeMin = sysIn.nextLong();
+		System.out.println("Enter maximum file size(KB)");
+		sizeMax = sysIn.nextLong();
+		
+		displayFilesBetweenSize(currentDir, sizeMin, sizeMax, results);
+		System.out.println(resultStart);
+		results.forEach((k,v) -> { 
+			System.out.printf("%-110s %110s %n",k,v );
+		});
+		System.out.println(resultEnd);
+	}
+	
 }
