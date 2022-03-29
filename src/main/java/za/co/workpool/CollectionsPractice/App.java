@@ -1,4 +1,4 @@
-package za.co.workpool.CollectionsPractice;
+package za.co.workpool.CollectionsPractice; 
 
 import java.io.File;
 import java.nio.file.Files;
@@ -44,16 +44,23 @@ public class App
 		}
 	}
 
-	public static Set<String> findFileInDirectory(File dir,String fileName, Set<String> results) {
+	public static Set<String> findFileInDirectory(File dir, String fileName, Set<String> results, boolean ignoreCase) {
 		try {
 			File[] files = dir.listFiles();
 			
 			for (File file : files) {
 				if (file.isDirectory()) {
-					findFileInDirectory(file,fileName,results);
+					findFileInDirectory(file,fileName,results,ignoreCase);
 				} else {
-					if(file.getName().contains(fileName)) {
-						results.add(file.getPath());
+					if(ignoreCase) {
+						if(file.getName().matches("(?i).*"+fileName+".*")) {
+							results.add(file.getPath());
+						}
+					}
+					else {
+						if(file.getName().matches(".*"+fileName+".*")) {
+							results.add(file.getPath());
+						}
 					}
 				}
 			}
@@ -62,7 +69,7 @@ public class App
 		return results;
 	}
 
-	public static Set<String> displayExtensionInDirectory(File dir,String extName, Set<String> results) {
+	public static Set<String> displayExtensionInDirectory(File dir,String[] extName, Set<String> results) {
 		try {
 			File[] files = dir.listFiles();
 			
@@ -70,8 +77,10 @@ public class App
 				if (file.isDirectory()) {
 					displayExtensionInDirectory(file,extName,results);
 				} else {
-					if(FilenameUtils.getExtension(file.getName()).equalsIgnoreCase(extName)) {
-						results.add(file.getPath());
+					for(int k=0; k<extName.length; k++){
+						if(FilenameUtils.getExtension(file.getName()).equalsIgnoreCase(extName[k])) {
+							results.add(file.getPath());
+						}
 					}
 				}
 			}
@@ -111,7 +120,7 @@ public class App
 		boolean repeatMenu = true;
 		
 		while (repeatMenu) {
-			System.out.println("\n1. View a directory \n2. Find a file in a directory \n3. Search by file extension \n4. Search by file size(KB) \n5. Exit");
+			System.out.println("\n1. View a directory \n2. Search directory files(Case insensitive) \n3. Search directory files(Case sensitive) \n4. Search by file extension \n5. Search by file size(KB) \n6. Exit");
 			choice = sysIn.next();
 			try {
 				switch (choice) {
@@ -120,17 +129,22 @@ public class App
 					break;
 
 				case "2":
-					findFileMenu();
+					findFileMenu(true);
 					break;
 					
 				case "3":
-					findByExtensionMenu();
+					findFileMenu(false);
 					break;
 					
 				case "4":
+					findByExtensionMenu();
+					break;
+					
+				case "5":
 					findBySizeMenu();
 					break;
-				case "5":
+					
+				case "6":
 					System.exit(0);
 					
 				default:
@@ -147,64 +161,105 @@ public class App
 	public static void viewDirectoryMenu() {
 		System.out.println("Paste the directory to be viewed below:");
 		File displayDir = new File(sysIn.next());
-		System.out.println(resultStart);
-		displayDirectoryContents(displayDir);
-		System.out.println(resultEnd);
+		if(displayDir.exists()) {
+			System.out.println(resultStart);
+			displayDirectoryContents(displayDir);
+			System.out.println(resultEnd);
+		} else {
+			System.out.println("Directory does not exist.");
+			viewDirectoryMenu();
+		}
 	}
 	
-	public static void findFileMenu() {
-		Set<String> results = new HashSet<String>();
+	public static void findFileMenu(boolean ignoreCase) {
+		Set<String> results = new HashSet<>();
 		
 		System.out.println("Paste the directory you would like to search below:");
 		File currentDir = new File(sysIn.next());
-		
-		System.out.print("Enter search term:");
-		String searchString = sysIn.next();
-		
-		findFileInDirectory(currentDir, searchString, results);
-		System.out.println(resultStart);
-		for (String result : results) {
-			System.out.println(result);
+		if(currentDir.exists()) {
+			System.out.print("Enter search term:");
+			String searchString = sysIn.next();
+			
+			findFileInDirectory(currentDir, searchString, results, ignoreCase);
+			
+			if(!results.isEmpty()) {
+				System.out.println(resultStart);
+				for (String result : results) {
+					System.out.println(result);
+				}
+				System.out.println(resultEnd);
+			} else {
+				System.out.println("No results.");
+			}
 		}
-		System.out.println(resultEnd);
+		else {
+			System.out.println("Directory does not exist.");
+			findFileMenu(ignoreCase);
+		}
+		
 	}
 	
 	public static void findByExtensionMenu() {
-		Set<String> results = new HashSet<String>();
+		Set<String> results = new HashSet<>();
 		
 		System.out.println("Paste the directory you would like to search below:");
 		File extDir = new File(sysIn.next());
-		System.out.print("Enter extension:");
-		String searchString1 = sysIn.next();
-		if(searchString1.startsWith(".")) {
-			searchString1=searchString1.substring(1);
+		
+		if(extDir.exists()) {
+			System.out.print("Enter extension (seperate by comma if multiple):");
+			String searchString1 = sysIn.next();
+			
+			String[] extensions = searchString1.split(",");
+			for(int i=0; i<extensions.length; i++) {
+				extensions[i] = extensions[i].trim();
+				if(extensions[i].startsWith(".")) {
+					searchString1=searchString1.substring(1);
+				}
+			}
+			
+			displayExtensionInDirectory(extDir, extensions, results);
+			if(!results.isEmpty()) {
+				System.out.println(resultStart);
+				for (String result : results) {
+					System.out.println(result);
+				}
+				System.out.println(resultEnd);
+			} else {
+				System.out.println("No results.");
+			}
+		} else {
+			System.out.println("Directory does not exist.");
+			findByExtensionMenu();
 		}
-		displayExtensionInDirectory(extDir, searchString1, results);
-		System.out.println(resultStart);
-		for (String result : results) {
-			System.out.println(result);
-		}
-		System.out.println(resultEnd);
 	}
 	
 	public static void findBySizeMenu() {
-		Map<String,Double> results = new HashMap<String,Double>();
+		Map<String,Double> results = new HashMap<>();
 		long sizeMin = 0;
 		long sizeMax = 0;
 		System.out.println("Paste the directory you would like to search below:");
 		File currentDir = new File(sysIn.next());
 		
-		System.out.print("Enter minimum file size(KB):");
-		sizeMin = sysIn.nextLong();
-		System.out.println("Enter maximum file size(KB)");
-		sizeMax = sysIn.nextLong();
-		
-		displayFilesBetweenSize(currentDir, sizeMin, sizeMax, results);
-		System.out.println(resultStart);
-		results.forEach((k,v) -> { 
-			System.out.printf("%-110s %110s %n",k,v );
-		});
-		System.out.println(resultEnd);
+		if(currentDir.exists()) {
+			System.out.print("Enter minimum file size(KB): ");
+			sizeMin = sysIn.nextLong();
+			System.out.print("Enter maximum file size(KB): ");
+			sizeMax = sysIn.nextLong();
+			
+			displayFilesBetweenSize(currentDir, sizeMin, sizeMax, results);
+			System.out.println(resultStart);
+			if(!results.isEmpty()) {
+				results.forEach((k,v) -> { 
+					System.out.printf("%-110s %110s %n",k, (int)Math.ceil(v)+"KB" );
+				});
+				System.out.println(resultEnd);
+			} else {
+				System.out.println("No results");
+			}
+		} else {
+			System.out.println("Directory does not exist.");
+			findBySizeMenu();
+		}
 	}
 	
 }

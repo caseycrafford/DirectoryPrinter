@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
  
@@ -31,6 +33,12 @@ public class AppTest {
 		assertTrue(bool);
 	}
 
+	@Test
+	void testMatches() {
+		Set<String> matches = new HashSet<>();
+		App.findFileInDirectory(new File("C:Users/Developer/Downloads"), "Log", matches,true);
+		System.out.println(matches);
+	}
 	
 	@Test
 	void testStuff() {
